@@ -55,7 +55,8 @@ The project aims to make smart agricultural decisions accessible to farmers, esp
 3. **Weather Data**: Users can enter their city or location to receive up-to-date weather information that impacts crop growth.
 4. **Live Camera Integration**: Use your mobile or web camera to capture soil images directly for classification and recommendations.
 
-### Installation
+
+## Installation
 
 Follow these steps to set up and run the **SoilSense** system on your local machine.
 
@@ -66,55 +67,95 @@ Clone the repository and navigate into the project directory:
 ```bash
 git clone https://github.com/your-username/SoilSense.git
 cd SoilSense
-Step 2: Set up a Virtual Environment (Optional but Recommended)
-For Linux/Mac:
+```
 
-bash
-Copy code
+### Step 2: Set up a Virtual Environment (Optional but Recommended)
+
+It is recommended to set up a virtual environment to manage dependencies more efficiently.
+
+**For Linux/Mac**:
+```bash
 python3 -m venv venv
 source venv/bin/activate
-For Windows:
+```
 
-bash
-Copy code
+**For Windows**:
+```bash
 python -m venv venv
 venv\Scripts\activate
-Step 3: Install Dependencies
-Install the required dependencies listed in requirements.txt:
+```
 
-bash
-Copy code
+### Step 3: Install Dependencies
+
+Install the required dependencies listed in `requirements.txt`:
+
+```bash
 pip install -r requirements.txt
-Step 4: Set up Model and Data
-Ensure the soil classification model is saved in the project directory under the models folder. If not, follow the instructions to download and place the model in the correct folder.
+```
 
-Step 5: Run the Application
+### Step 4: Set up Model and Data
+
+Ensure the soil classification model is saved in the project directory under the `backend` folder. If not, follow the instructions to download and place the model in the correct folder.
+
+### Step 5: Run the Application
+
 To run the Flask application, use the following command:
 
-bash
-Copy code
+```bash
 python app.py
-Step 6: Access the Application
+```
+
+### Step 6: Access the Application
+
 Open your web browser and navigate to:
 
-arduino
-Copy code
+```
 http://127.0.0.1:5000
+```
+
 You can upload a soil image and receive crop recommendations and weather information.
 
-Technologies Used
-Deep Learning Framework: TensorFlow, Keras
-Web Development: Flask, HTML, CSS, JavaScript
-Weather API: OpenWeatherMap API for fetching real-time weather data
-Image Processing: Keras and TensorFlow for model inference
-Version Control: Git, GitHub
-Contributing
+---
+
+## Technologies Used
+
+The **SoilSense** system is built using various technologies and frameworks to provide efficient soil classification and crop recommendation.
+
+- **Deep Learning Framework**: 
+  - **TensorFlow**: Used for building and training the convolutional neural network (CNN) model for soil classification.
+  - **Keras**: Provides high-level APIs for easy model building and training.
+
+- **Web Development**: 
+  - **Flask**: A lightweight Python web framework used for creating the web application.
+  - **HTML, CSS, JavaScript**: These technologies are used for building the user interface and frontend of the application.
+
+- **Weather API**: 
+  - **OpenWeatherMap API**: Used for fetching real-time weather data (temperature, humidity, etc.) to enhance crop recommendations based on weather conditions.
+
+- **Image Processing**: 
+  - **Keras/TensorFlow**: Used to process and classify soil images by feeding them into the pre-trained CNN model.
+
+- **Version Control**: 
+  - **Git**: For source code management and version control.
+  - **GitHub**: For hosting the project repository and collaboration.
+
+---
+
+## Contributing
+
 Contributions are welcome! If you have suggestions for improvements or find any issues, feel free to open an issue or submit a pull request. Your contributions will help improve the accuracy and usability of the system.
 
-License
-You are free to use, modify, and distribute this project as per the terms of the MIT License.
+To contribute:
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix.
+3. Make your changes and commit them.
+4. Push to your fork and submit a pull request.
 
-css
-Copy code
+Before contributing, please ensure that your changes don't break the existing functionality. You can run the app locally and verify everything works as expected.
 
-This README file now includes a more detailed introduction, clear instructions on installation and usage, and the various objectives and features of the project.
+---
+
+## License
+
+This project is licensed under the MIT License. You are free to use, modify, and distribute this project as per the terms of the license.
+
