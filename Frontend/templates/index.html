@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoilSense - Crop Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1, h2, h3 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 5px;
+        }
+
+        input[type="file"], input[type="text"], select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+
+        #google_translate_element {
+            margin: 10px 0 20px;
+            text-align: right;
+        }
+
+        .goog-te-combo {
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+
+        #camera-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        video, img {
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+
+        canvas {
+            display: none;
+        }
+    </style>
+    <script>
+        // Load the Google Translate script dynamically
+        function loadGoogleTranslateScript() {
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = 'http://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            document.head.appendChild(script);
+        }
+
+        // Initialize Google Translate
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,hi,kn,ml,ta,te',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+
+        // Ensure Google Translate loads on page load
+        document.addEventListener('DOMContentLoaded', loadGoogleTranslateScript);
+
+        // Live Camera Integration
+        let videoStream;
+
+        async function startCamera() {
+            const videoElement = document.getElementById('camera-feed');
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = videoStream;
+                videoElement.play();
+            } catch (error) {
+                alert('Unable to access the camera: ' + error.message);
+            }
+        }
+
+        function captureImage() {
+            const videoElement = document.getElementById('camera-feed');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            const imageDisplay = document.getElementById('captured-image');
+            
+            // Capture the image from the video feed
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            const imageDataURL = canvas.toDataURL('image/jpeg');
+
+            // Display the captured image
+            imageDisplay.src = imageDataURL;
+            imageDisplay.style.display = 'block';
+
+            // Store the captured image in the form for analysis
+            const hiddenInput = document.getElementById('hidden-captured-image');
+            hiddenInput.value = imageDataURL;  // Store the captured image in the hidden input field
+        }
+
+        function stopCamera() {
+            if (videoStream) {
+                const tracks = videoStream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+        }
+
+        window.addEventListener('beforeunload', stopCamera);
+    </script>
+</head>
+<body>
+    <header>
+        <h1>SoilSense - Crop Recommendation</h1>
+    </header>
+    <main>
+        <div class="container">
+            <!-- Google Translate Button -->
+            <div id="google_translate_element"></div>
+            
+            <!-- Step 1: Upload or Capture Soil Image -->
+            <h2>Step 1: Upload or Capture Soil Image</h2>
+            <form method="POST" action="/predict" enctype="multipart/form-data">
+                
+                <!-- File Upload Section -->
+                <label for="file">Upload Soil Image:</label>
+                <input type="file" name="file" id="file">
+
+                <!-- Live Camera Section -->
+                <h3>Or Capture Soil Image</h3>
+                <div id="camera-container">
+                    <video id="camera-feed"></video>
+                    <canvas id="canvas" width="224" height="224"></canvas>
+                    <img id="captured-image" style="display: none;" alt="Captured Soil Image">
+                    <button type="button" onclick="startCamera()">Start Camera</button>
+                    <button type="button" onclick="captureImage()">Capture Image</button>
+                    <button type="button" onclick="stopCamera()">Stop Camera</button>
+                </div>
+
+                <!-- Hidden input to store captured image -->
+                <input type="hidden" id="hidden-captured-image" name="captured_image">
+
+                <!-- City Name Input -->
+                <label for="city">Enter City Name:</label>
+                <input type="text" name="city" id="city" placeholder="Enter city for weather info" required>
+
+                <!-- Submit Button -->
+                <button type="submit">Analyze Soil</button>
+            </form>
+
+            {% if error %}
+            <p class="error">{{ error }}</p>
+            {% endif %}
+
+            {% if crops %}
+            <h2>Step 2: Select a Crop</h2>
+            <form method="POST" action="/crop_details">
+                <p>Detected Soil Type: <strong>{{ soil_type }}</strong></p>
+                <label for="crop_type">Select a Crop:</label>
+                <select name="crop_type" id="crop_type" required>
+                    {% for crop in crops %}
+                    <option value="{{ crop }}">{{ crop }}</option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" name="soil_type" value="{{ soil_type }}">
+                <button type="submit">Get Crop Details</button>
+            </form>
+            {% endif %}
+
+            {% if temperature and humidity %}
+            <h3>Weather Information for {{ city }}</h3>
+            <p><strong>Temperature:</strong> {{ temperature }}°C</p>
+            <p><strong>Humidity:</strong> {{ humidity }}%</p>
+            <p><strong>Weather Description:</strong> {{ description | capitalize }}</p>
+            {% endif %}
+
+            {% if crop_info %}
+            <h2>Step 3: Crop Details</h2>
+            <p><strong>Soil Type:</strong> {{ crop_info['Soil Type'] }}</p>
+            <p><strong>Crop Type:</strong> {{ crop_info['Crop Type'] }}</p>
+            <p><strong>Temperature:</strong> {{ crop_info['Temparature'] }}°C</p>
+            <p><strong>Humidity:</strong> {{ crop_info['Humidity'] }}%</p>
+            <p><strong>Nitrogen:</strong> {{ crop_info['Nitrogen'] }}</p>
+            <p><strong>Phosphorous:</strong> {{ crop_info['Phosphorous'] }}</p>
+            <p><strong>Potassium:</strong> {{ crop_info['Potassium'] }}</p>
+            <p><strong>Recommended Fertilizer:</strong> {{ crop_info['Fertilizer Name'] }}</p>
+            <a href="/">Start Over</a>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>
